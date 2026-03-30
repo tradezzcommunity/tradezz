@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRADEZZ — Elite Traders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:        #1e2a2a;
+    --bg2:       #243030;
+    --bg3:       #1a2424;
+    --surface:   #243535;
+    --border:    rgba(180,210,190,0.12);
+    --gold:      #c9a96e;
+    --gold-dim:  #9e7d4a;
+    --silver:    #b8cfc4;
+    --silver-dim:#7a9e8e;
+    --text:      #d4e8dc;
+    --text-dim:  #7fa090;
+    --white:     #eef5ef;
+    --accent:    #4db87a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.4rem 4rem;
+    background: rgba(30,42,42,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    display: flex; align-items: center; gap: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .nav-logo-mark {
+    width: 42px; height: 42px;
+    border: 1.5px solid var(--gold-dim);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+
+  /* Cross arrows SVG inside logo mark */
+  .nav-logo-mark svg { width: 24px; height: 24px; }
+
+  .nav-brand {
+    display: flex; flex-direction: column; line-height: 1;
+  }
+  .nav-brand-top {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .nav-brand-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--silver-dim);
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex; gap: 2.5rem; list-style: none;
+  }
+  .nav-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--silver);
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    padding-bottom: 2px;
+    transition: color 0.3s;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: -2px; left: 0; right: 0; height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--gold); }
+  .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+
+  .nav-cta {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--bg);
+    background: var(--gold);
+    border: none;
+    padding: 0.6rem 1.4rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+  }
+  .nav-cta:hover { background: var(--gold-dim); }
+
+  /* ─── PAGES ─── */
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    padding: 8rem 2rem 4rem;
+    text-align: center;
+  }
+
+  /* Decorative grid lines */
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(180,210,190,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(180,210,190,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+    pointer-events: none;
+  }
+
+  /* Radial glow */
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -55%);
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(201,169,110,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-badge {
+    width: 120px; height: 120px;
+    margin: 0 auto 2.5rem;
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.1s forwards;
+  }
+
+  .hero-badge-ring {
+    width: 100%; height: 100%;
+    border: 1.5px solid var(--gold-dim);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    animation: spin 40s linear infinite;
+  }
+
+  .hero-badge-inner {
+    position: absolute; inset: 12px;
+    border: 1px solid rgba(201,169,110,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    animation: spin 40s linear infinite reverse;
+  }
+
+  .hero-badge svg { width: 54px; height: 54px; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hero-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(3.5rem, 10vw, 7rem);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    color: var(--white);
+    line-height: 0.95;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+  }
+
+  .hero-title span { color: var(--gold); }
+
+  .hero-subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.7rem, 2vw, 0.9rem);
+    letter-spacing: 0.6em;
+    color: var(--silver-dim);
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-divider {
+    display: flex; align-items: center; gap: 1.5rem;
+    margin: 2rem auto;
+    width: min(500px, 80%);
+    opacity: 0;
+    animation: fadeUp 0.8s 0.45s forwards;
+  }
+  .hero-divider-line { flex: 1; height: 1px; background: var(--border); }
+  .hero-divider-diamond {
+    width: 6px; height: 6px;
+    background: var(--gold);
+    transform: rotate(45deg);
+  }
+
+  .hero-desc {
+    font-size: 1.1rem;
+    color: var(--silver);
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    font-weight: 300;
+    font-style: italic;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+
+  .hero-actions {
+    display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .btn-primary {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 1rem 2.5rem;
+    background: var(--gold);
+    color: var(--bg3);
+    border: none; cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+  }
+  .btn-primary:hover { background: var(--white); transform: translateY(-2px); }
+
+  .btn-outline {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 1rem 2.5rem;
+    background: transparent;
+    color: var(--silver);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+
+  /* ─── STATS STRIP ─── */
+  .stats-strip {
+    background: var(--bg3);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 4rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .stat-item {}
+  .stat-num {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    display: block;
+  }
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+    display: block;
+  }
+
+  /* ─── SECTION SHARED ─── */
+  section { padding: 7rem 4rem; }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 5rem;
+  }
+
+  .section-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+  }
+
+  .section-line {
+    width: 60px; height: 1px;
+    background: var(--gold);
+    margin: 1.5rem auto;
+  }
+
+  .section-lead {
+    color: var(--silver);
+    font-size: 1.1rem;
+    font-style: italic;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ─── PILLARS (home) ─── */
+  .pillars {
+    background: var(--bg2);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0;
+  }
+
+  .pillar {
+    padding: 4rem 3rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s;
+  }
+  .pillar:hover { background: var(--surface); }
+  .pillar:last-child { border-right: none; }
+
+  .pillar-icon {
+    width: 48px; height: 48px;
+    border: 1px solid var(--gold-dim);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 2rem;
+    color: var(--gold);
+  }
+
+  .pillar-num {
+    position: absolute; top: 1.5rem; right: 2rem;
+    font-family: 'Cinzel', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    color: rgba(201,169,110,0.06);
+    line-height: 1;
+  }
+
+  .pillar h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    color: var(--white);
+    margin-bottom: 1rem;
+  }
+
+  .pillar p { color: var(--text-dim); font-size: 0.95rem; }
+
+  /* ─── HIERARCHY ─── */
+  .hierarchy { background: var(--bg3); }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .team-card {
+    background: var(--surface);
+    padding: 3rem 2.5rem;
+    text-align: center;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s;
+  }
+  .team-card:hover { border-color: var(--gold-dim); transform: translateY(-4px); }
+
+  .team-card.leader {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--surface), var(--bg2));
+  }
+
+  .team-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .team-card:hover::before { opacity: 1; }
+
+  .team-avatar {
+    width: 80px; height: 80px;
+    border: 1.5px solid var(--gold-dim);
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    color: var(--gold);
+    background: var(--bg3);
+  }
+
+  .team-role {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .team-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    color: var(--white);
+    letter-spacing: 0.05em;
+  }
+
+  .team-alias {
+    font-style: italic;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+  }
+
+  /* ─── ABOUT PAGE ─── */
+  .about-hero {
+    min-height: 50vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 10rem 2rem 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .about-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(201,169,110,0.07) 0%, transparent 65%);
+  }
+
+  .about-content {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .about-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: start;
+    margin-bottom: 6rem;
+  }
+  @media (max-width: 768px) { .about-block { grid-template-columns: 1fr; gap: 3rem; } }
+
+  .about-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  .about-heading {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: var(--white);
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    margin-bottom: 2rem;
+  }
+
+  .about-text { color: var(--silver); line-height: 1.9; margin-bottom: 1.5rem; }
+
+  .about-visual {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    aspect-ratio: 4/5;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-visual-inner {
+    text-align: center;
+  }
+
+  /* Rules section */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .rule-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    display: flex; gap: 1.5rem;
+    align-items: flex-start;
+    transition: all 0.3s;
+  }
+  .rule-card:hover { border-color: rgba(201,169,110,0.3); background: var(--bg2); }
+
+  .rule-num {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: rgba(201,169,110,0.25);
+    line-height: 1;
+    min-width: 2rem;
+  }
+
+  .rule-body h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .rule-body p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; }
+
+  /* ─── RESOURCES PAGE ─── */
+  .resources-hero {
+    min-height: 45vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 10rem 2rem 4rem;
+    position: relative;
+  }
+  .resources-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(77,184,122,0.05) 0%, transparent 70%);
+  }
+
+  .resources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .resource-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s;
+    cursor: pointer;
+  }
+  .resource-card:hover { border-color: var(--gold-dim); transform: translateY(-4px); }
+
+  .resource-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--accent));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s;
+  }
+  .resource-card:hover::after { transform: scaleX(1); }
+
+  .resource-icon {
+    width: 44px; height: 44px;
+    border: 1px solid var(--gold-dim);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.5rem;
+    color: var(--gold);
+  }
+
+  .resource-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .resource-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--white);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.8rem;
+  }
+
+  .resource-desc { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; }
+
+  .resource-arrow {
+    position: absolute; top: 2.5rem; right: 2.5rem;
+    color: var(--gold-dim);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .resource-card:hover .resource-arrow { opacity: 1; }
+
+  /* disclaimer */
+  .disclaimer-box {
+    background: rgba(201,169,110,0.05);
+    border: 1px solid rgba(201,169,110,0.2);
+    border-left: 3px solid var(--gold);
+    padding: 2rem 2.5rem;
+    max-width: 800px;
+    margin: 4rem auto 0;
+  }
+
+  .disclaimer-box h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    margin-bottom: 0.7rem;
+  }
+
+  .disclaimer-box p { color: var(--text-dim); font-size: 0.9rem; }
+
+  /* ─── CONTACT PAGE ─── */
+  .contact-hero {
+    min-height: 45vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 10rem 2rem 4rem;
+  }
+
+  .contact-layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 5rem;
+    align-items: start;
+  }
+  @media (max-width: 800px) { .contact-layout { grid-template-columns: 1fr; } }
+
+  .contact-info {}
+
+  .contact-info h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    color: var(--white);
+    letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+  }
+
+  .contact-info p { color: var(--text-dim); margin-bottom: 3rem; }
+
+  .contact-detail {
+    display: flex; gap: 1.2rem; align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+
+  .contact-detail-icon {
+    width: 40px; height: 40px; min-width: 40px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold);
+  }
+
+  .contact-detail-text {}
+  .contact-detail-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .contact-detail-value {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    color: var(--silver);
+    margin-top: 0.2rem;
+  }
+
+  /* Form */
+  .contact-form-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 3rem;
+  }
+
+  .form-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    color: var(--white);
+    letter-spacing: 0.08em;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-group { margin-bottom: 1.5rem; }
+
+  .form-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.6rem;
+  }
+
+  .form-control {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.9rem 1.2rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .form-control:focus { border-color: var(--gold-dim); }
+  .form-control::placeholder { color: var(--text-dim); opacity: 0.5; }
+
+  textarea.form-control { resize: vertical; min-height: 140px; }
+
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239e7d4a' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+  }
+  .form-select option { background: var(--bg3); }
+
+  .form-submit {
+    width: 100%;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 1.1rem;
+    background: var(--gold);
+    color: var(--bg3);
+    border: none; cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 0.5rem;
+  }
+  .form-submit:hover { background: var(--white); }
+
+  /* Success message */
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+  }
+  .form-success.visible { display: block; }
+  .form-success p { color: var(--accent); font-style: italic; }
+
+  /* ─── DISCORD CTA ─── */
+  .discord-cta {
+    background: var(--bg3);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 6rem 4rem;
+    text-align: center;
+  }
+
+  .discord-cta h2 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    color: var(--white);
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+  }
+  .discord-cta p { color: var(--text-dim); margin-bottom: 2.5rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+  .discord-btn {
+    display: inline-flex; align-items: center; gap: 0.8rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 1rem 2.5rem;
+    background: #5865F2;
+    color: #fff;
+    border: none; cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  .discord-btn:hover { background: #4752c4; transform: translateY(-2px); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--bg3);
+    border-top: 1px solid var(--border);
+    padding: 4rem;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 4rem;
+  }
+  @media (max-width: 700px) { footer { grid-template-columns: 1fr; gap: 2rem; } }
+
+  .footer-brand-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+  }
+  .footer-brand-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .footer-desc { color: var(--text-dim); font-size: 0.9rem; line-height: 1.8; }
+
+  .footer-col-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--silver);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-links { list-style: none; }
+  .footer-links li { margin-bottom: 0.8rem; }
+  .footer-links a {
+    color: var(--text-dim); text-decoration: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--gold); }
+
+  .footer-bottom {
+    background: var(--bg3);
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  /* ─── MOBILE NAV ─── */
+  .hamburger {
+    display: none; flex-direction: column; gap: 5px;
+    cursor: pointer; padding: 4px;
+  }
+  .hamburger span { width: 22px; height: 1.5px; background: var(--silver); display: block; transition: all 0.3s; }
+
+  .mobile-menu {
+    display: none; position: fixed; inset: 0; z-index: 99;
+    background: rgba(26,36,36,0.97);
+    align-items: center; justify-content: center; flex-direction: column; gap: 2.5rem;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.2em;
+    color: var(--silver);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .mobile-menu a:hover { color: var(--gold); }
+  .mobile-close { position: absolute; top: 2rem; right: 2rem; cursor: pointer; color: var(--silver); font-size: 1.5rem; }
+
+  @media (max-width: 900px) {
+    nav { padding: 1.2rem 2rem; }
+    .nav-links, .nav-cta { display: none; }
+    .hamburger { display: flex; }
+    section { padding: 5rem 2rem; }
+    .stats-strip { padding: 2rem; }
+    .discord-cta { padding: 4rem 2rem; }
+    footer { padding: 3rem 2rem; }
+    .footer-bottom { padding: 1.5rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.2">
+        <line x1="4" y1="4" x2="20" y2="20"/>
+        <line x1="20" y1="4" x2="4" y2="20"/>
+        <polygon points="12,2 14,6 12,5 10,6" fill="#c9a96e" opacity="0.6"/>
+        <polygon points="12,22 14,18 12,19 10,18" fill="none" stroke="#c9a96e" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="nav-brand">
+      <span class="nav-brand-top">TRADEZZ</span>
+      <span class="nav-brand-sub">Elite Traders</span>
+    </div>
+  </div>
+
+  <ul class="nav-links">
+    <li><a onclick="showPage('home')" id="nav-home" class="active">Home</a></li>
+    <li><a onclick="showPage('about')" id="nav-about">About</a></li>
+    <li><a onclick="showPage('resources')" id="nav-resources">Resources</a></li>
+    <li><a onclick="showPage('contact')" id="nav-contact">Contact</a></li>
+  </ul>
+
+  <button class="nav-cta" onclick="showPage('contact')">Join Now</button>
+
+  <div class="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ─── MOBILE MENU ─── -->
+<div class="mobile-menu" id="mobileMenu">
+  <span class="mobile-close" onclick="toggleMenu()">✕</span>
+  <a onclick="showPage('home');toggleMenu()">Home</a>
+  <a onclick="showPage('about');toggleMenu()">About</a>
+  <a onclick="showPage('resources');toggleMenu()">Resources</a>
+  <a onclick="showPage('contact');toggleMenu()">Contact</a>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: HOME
+════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- Hero -->
+  <section class="hero" style="padding-top:8rem">
+    <div class="hero-badge">
+      <div class="hero-badge-ring">
+        <div class="hero-badge-inner">
+          <svg viewBox="0 0 54 54" fill="none" stroke="#c9a96e" stroke-width="1">
+            <line x1="8" y1="8" x2="46" y2="46"/>
+            <line x1="46" y1="8" x2="8" y2="46"/>
+            <polygon points="27,4 30,12 27,10 24,12" fill="#c9a96e" opacity="0.7"/>
+            <polygon points="27,50 30,42 27,44 24,42" fill="none" stroke="#c9a96e" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <p class="hero-eyebrow">Est. 2025 &nbsp;·&nbsp; Free Community</p>
+
+    <h1 class="hero-title">TRADE<span>ZZ</span></h1>
+    <p class="hero-subtitle">Elite Traders Community</p>
+
+    <div class="hero-divider">
+      <div class="hero-divider-line"></div>
+      <div class="hero-divider-diamond"></div>
+      <div class="hero-divider-line"></div>
+    </div>
+
+    <p class="hero-desc">
+      A sanctuary for traders from all walks of life — to learn, grow, and ascend together to the mindset of the 1%.
+    </p>
+
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="showPage('contact')">Join The Community</button>
+      <button class="btn-outline" onclick="showPage('about')">Discover More</button>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats-strip">
+    <div class="stat-item">
+      <span class="stat-num">2025</span>
+      <span class="stat-label">Year Founded</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">Free</span>
+      <span class="stat-label">Always & Forever</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">24/7</span>
+      <span class="stat-label">Community Access</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">∞</span>
+      <span class="stat-label">Education Resources</span>
+    </div>
+  </div>
+
+  <!-- Pillars -->
+  <section style="padding:0;">
+    <div class="pillars">
+      <div class="pillar">
+        <span class="pillar-num">01</span>
+        <div class="pillar-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3>Education First</h3>
+        <p>Curated educational resources covering fundamentals, technicals, and the trader's mindset — all freely accessible.</p>
+      </div>
+      <div class="pillar">
+        <span class="pillar-num">02</span>
+        <div class="pillar-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Community Driven</h3>
+        <p>Share charts, get second opinions, discuss calls, and connect with traders who genuinely want to see you succeed.</p>
+      </div>
+      <div class="pillar">
+        <span class="pillar-num">03</span>
+        <div class="pillar-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Live Analysis</h3>
+        <p>Real-time chart discussions, market breakdowns, and live trading insight from experienced members.</p>
+      </div>
+      <div class="pillar">
+        <span class="pillar-num">04</span>
+        <div class="pillar-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h3>Mindset & Growth</h3>
+        <p>We don't just trade markets — we train minds. Embrace the 1% mindset and self-develop to your highest potential.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Leadership -->
+  <section class="hierarchy">
+    <div class="section-header fade-up">
+      <span class="section-tag">Community Leadership</span>
+      <h2 class="section-title">The Hierarchy</h2>
+      <div class="section-line"></div>
+      <p class="section-lead">The dedicated team behind TRADEZZ, committed to building and maintaining a premier trading community.</p>
+    </div>
+
+    <div class="team-grid">
+      <div class="team-card leader fade-up">
+        <div class="team-avatar">D</div>
+        <div class="team-role">Leader &amp; Founder</div>
+        <div class="team-name">Dragos</div>
+        <div class="team-alias">Founder of TRADEZZ Elite Traders</div>
+      </div>
+      <div class="team-card fade-up">
+        <div class="team-avatar">S</div>
+        <div class="team-role">Moderator, Co-Founder &amp; Admin</div>
+        <div class="team-name">Soumya</div>
+        <div class="team-alias">Infinix</div>
+      </div>
+      <div class="team-card fade-up">
+        <div class="team-avatar">S</div>
+        <div class="team-role">Technician &amp; Executive Officer</div>
+        <div class="team-name">Soumyajit2928</div>
+        <div class="team-alias">Technical Operations</div>
+      </div>
+      <div class="team-card fade-up">
+        <div class="team-avatar">S</div>
+        <div class="team-role">Elite &amp; Experienced Trader</div>
+        <div class="team-name">Shawn</div>
+        <div class="team-alias">Senior Trading Specialist</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Discord CTA -->
+  <div class="discord-cta fade-up">
+    <h2>Ready to Join the Community?</h2>
+    <p>Step into a growing circle of traders. Free. Forever. Focused on your growth.</p>
+    <a class="discord-btn" href="https://discord.gg/sy3Anr6qm6" onclick="showPage('contact')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.001.022.01.043.023.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+      Join on Discord
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div>
+      <div class="footer-brand-name">TRADEZZ</div>
+      <div class="footer-brand-sub">Elite Traders · Est. 2025</div>
+      <p class="footer-desc">A free, community-driven space where traders learn, share, and grow together — guided by experience and powered by passion.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Navigation</div>
+      <ul class="footer-links">
+        <li><a onclick="showPage('home')">Home</a></li>
+        <li><a onclick="showPage('about')">About Us</a></li>
+        <li><a onclick="showPage('resources')">Resources</a></li>
+        <li><a onclick="showPage('contact')">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Community</div>
+      <ul class="footer-links">
+        <li><a href="#">Discord Server</a></li>
+        <li><a onclick="showPage('about')">Server Rules</a></li>
+        <li><a onclick="showPage('about')">Leadership</a></li>
+        <li><a onclick="showPage('resources')">Education Hub</a></li>
+      </ul>
+    </div>
+  </footer>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 TRADEZZ Elite Traders — All Rights Reserved</span>
+    <span class="footer-copy">For Educational Purposes Only · Not Financial Advice</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: ABOUT
+════════════════════════════════════════ -->
+<div class="page" id="page-about">
+
+  <div class="about-hero">
+    <span class="section-tag" style="opacity:0;animation:fadeUp .8s .1s forwards">Our Story</span>
+    <h1 class="section-title" style="font-size:clamp(2rem,6vw,4rem);opacity:0;animation:fadeUp .8s .25s forwards">About TRADEZZ</h1>
+    <div class="section-line"></div>
+    <p class="section-lead" style="opacity:0;animation:fadeUp .8s .4s forwards">Built by traders, for traders — a community anchored in education, integrity, and shared growth.</p>
+  </div>
+
+  <section style="background:var(--bg2);">
+    <div class="about-content">
+      <div class="about-block">
+        <div>
+          <span class="about-label">Who We Are</span>
+          <h2 class="about-heading">More Than a Server. A Movement.</h2>
+          <p class="about-text">Welcome to the TRADEZZ free trading server. We take pleasure in inviting you to join our growing community of traders. Our goal is to provide a safe and enjoyable environment where you can expand your knowledge on trading and interact with like-minded individuals.</p>
+          <p class="about-text">We have curated a vast range of educational resources that are readily available for you to access, and our experienced traders are always happy to share their trading wisdom with you.</p>
+        </div>
+        <div class="about-visual">
+          <div class="about-visual-inner">
+            <svg viewBox="0 0 160 160" width="120" height="120" fill="none" stroke="#c9a96e" stroke-width="0.8" opacity="0.6">
+              <circle cx="80" cy="80" r="70"/>
+              <circle cx="80" cy="80" r="50"/>
+              <circle cx="80" cy="80" r="30"/>
+              <line x1="25" y1="25" x2="135" y2="135"/>
+              <line x1="135" y1="25" x2="25" y2="135"/>
+              <polygon points="80,12 85,24 80,21 75,24" fill="#c9a96e" opacity="0.5"/>
+              <polygon points="80,148 85,136 80,139 75,136" fill="none" stroke="#c9a96e"/>
+            </svg>
+            <p style="font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;color:var(--text-dim);margin-top:1.5rem;text-transform:uppercase">Est. 2025</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-block">
+        <div class="about-visual" style="order:2">
+          <div class="about-visual-inner" style="padding:2rem;">
+            <p style="font-family:'Cinzel',serif;font-size:3rem;color:rgba(201,169,110,0.12);font-weight:900;line-height:1">"</p>
+            <p style="font-style:italic;color:var(--silver);font-size:1.1rem;line-height:1.8">We want to be the place where you can learn the mindset of the 1%, and self develop to become the best version of you.</p>
+            <p style="font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.3em;color:var(--gold);margin-top:1.5rem;text-transform:uppercase">— TRADEZZ Mission</p>
+          </div>
+        </div>
+        <div style="order:1">
+          <span class="about-label">Our Mission</span>
+          <h2 class="about-heading">A Hub For All Traders, Worldwide.</h2>
+          <p class="about-text">At TRADEZZ, we aim to be a hub for traders from all walks of life around the world, to come together to discuss their ideas, share their calls and charts for second opinions, and connect with others who share the same interests.</p>
+          <p class="about-text">We understand the importance of community support when it comes to trading, and we believe our community can provide the necessary support and camaraderie to help you grow as a trader.</p>
+          <p class="about-text">Let's learn and grow together.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rules -->
+  <section>
+    <div class="section-header fade-up">
+      <span class="section-tag">Community Standards</span>
+      <h2 class="section-title">Server Rules</h2>
+      <div class="section-line"></div>
+      <p class="section-lead">Our rules exist to protect every member and uphold the quality of our community.</p>
+    </div>
+
+    <div class="rules-grid">
+      <div class="rule-card fade-up">
+        <div class="rule-num">01</div>
+        <div class="rule-body"><h4>Respect Everyone</h4><p>Treat all members with respect. No harassment, hate speech, or personal attacks will be tolerated.</p></div>
+      </div>
+      <div class="rule-card fade-up">
+        <div class="rule-num">02</div>
+        <div class="rule-body"><h4>No Spam or Self-Promotion</h4><p>Avoid spamming messages, links, or promoting personal services without permission.</p></div>
+      </div>
+      <div class="rule-card fade-up">
+        <div class="rule-num">03</div>
+        <div class="rule-body"><h4>No False Claims or "Guru" Behavior</h4><p>Do not present yourself as a financial expert or guarantee profits. Be honest and realistic.</p></div>
+      </div>
+      <div class="rule-card fade-up">
+        <div class="rule-num">04</div>
+        <div class="rule-body"><h4>Quality Over Quantity</h4><p>Keep conversations meaningful and relevant to trading, learning, and growth.</p></div>
+      </div>
+      <div class="rule-card fade-up">
+        <div class="rule-num">05</div>
+        <div class="rule-body"><h4>Help and Support Each Other</h4><p>Experienced members guide beginners. Beginners feel free to ask questions.</p></div>
+      </div>
+      <div class="rule-card fade-up">
+        <div class="rule-num">06</div>
+        <div class="rule-body"><h4>No Financial Advice</h4><p>All discussions are for educational purposes only. Always do your own research before any decision.</p></div>
+      </div>
+      <div class="rule-card fade-up">
+        <div class="rule-num">07</div>
+        <div class="rule-body"><h4>Respect Privacy</h4><p>Do not share personal information — yours or others' — without explicit consent.</p></div>
+      </div>
+      <div class="rule-card fade-up">
+        <div class="rule-num">08</div>
+        <div class="rule-body"><h4>Encourage Active Participation</h4><p>Engage in discussions, share insights, and contribute to the community's collective growth.</p></div>
+      </div>
+      <div class="rule-card fade-up">
+        <div class="rule-num">09</div>
+        <div class="rule-body"><h4>Use Channels Appropriately</h4><p>Keep discussions in relevant channels to maintain organization and clarity.</p></div>
+      </div>
+      <div class="rule-card fade-up">
+        <div class="rule-num">10</div>
+        <div class="rule-body"><h4>Follow Admin Instructions</h4><p>Decisions made by admins and mods are final and must be respected to maintain order.</p></div>
+      </div>
+    </div>
+
+    <p style="text-align:center;font-style:italic;color:var(--text-dim);margin-top:3rem;font-size:.9rem">Let's keep this server a focused, respectful, and growth-oriented space for all traders.<br>— <em>infinix_ (spandy)</em></p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div>
+      <div class="footer-brand-name">TRADEZZ</div>
+      <div class="footer-brand-sub">Elite Traders · Est. 2025</div>
+      <p class="footer-desc">A free, community-driven space where traders learn, share, and grow together.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Navigation</div>
+      <ul class="footer-links">
+        <li><a onclick="showPage('home')">Home</a></li>
+        <li><a onclick="showPage('about')">About Us</a></li>
+        <li><a onclick="showPage('resources')">Resources</a></li>
+        <li><a onclick="showPage('contact')">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Community</div>
+      <ul class="footer-links">
+        <li><a href="#">Discord Server</a></li>
+        <li><a onclick="showPage('about')">Server Rules</a></li>
+        <li><a onclick="showPage('about')">Leadership</a></li>
+      </ul>
+    </div>
+  </footer>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 TRADEZZ Elite Traders — All Rights Reserved</span>
+    <span class="footer-copy">For Educational Purposes Only · Not Financial Advice</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: RESOURCES
+════════════════════════════════════════ -->
+<div class="page" id="page-resources">
+
+  <div class="resources-hero">
+    <span class="section-tag" style="opacity:0;animation:fadeUp .8s .1s forwards">Knowledge Hub</span>
+    <h1 class="section-title" style="font-size:clamp(2rem,6vw,4rem);opacity:0;animation:fadeUp .8s .25s forwards">Resources</h1>
+    <div class="section-line"></div>
+    <p class="section-lead" style="opacity:0;animation:fadeUp .8s .4s forwards">Everything you need to start and scale your trading journey — curated, organized, and completely free.</p>
+  </div>
+
+  <section style="background:var(--bg2);">
+    <div class="section-header fade-up">
+      <span class="section-tag">Getting Started</span>
+      <h2 class="section-title">Trading Fundamentals</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="resources-grid">
+      <div class="resource-card fade-up">
+        <div class="resource-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <div class="resource-tag">Beginner</div>
+        <div class="resource-title">Market Basics</div>
+        <p class="resource-desc">Learn the foundational concepts of financial markets — how they work, who participates, and how prices are determined.</p>
+        <span class="resource-arrow">→</span>
+      </div>
+
+      <div class="resource-card fade-up">
+        <div class="resource-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="resource-tag">Beginner</div>
+        <div class="resource-title">Technical Analysis 101</div>
+        <p class="resource-desc">Introduction to chart reading, candlestick patterns, support & resistance, and the most commonly used indicators.</p>
+        <span class="resource-arrow">→</span>
+      </div>
+
+      <div class="resource-card fade-up">
+        <div class="resource-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div class="resource-tag">Beginner</div>
+        <div class="resource-title">Timeframes Explained</div>
+        <p class="resource-desc">Understand the difference between scalping, day trading, swing trading, and position trading — and which suits you.</p>
+        <span class="resource-arrow">→</span>
+      </div>
+
+      <div class="resource-card fade-up">
+        <div class="resource-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="resource-tag">Intermediate</div>
+        <div class="resource-title">Price Action Mastery</div>
+        <p class="resource-desc">Go beyond indicators — learn to read raw price action, structure, and market context like a professional trader.</p>
+        <span class="resource-arrow">→</span>
+      </div>
+
+      <div class="resource-card fade-up">
+        <div class="resource-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+        </div>
+        <div class="resource-tag">Intermediate</div>
+        <div class="resource-title">Risk Management</div>
+        <p class="resource-desc">The most critical skill in trading. Learn position sizing, risk-to-reward ratios, stop placement, and protecting your capital.</p>
+        <span class="resource-arrow">→</span>
+      </div>
+
+      <div class="resource-card fade-up">
+        <div class="resource-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        </div>
+        <div class="resource-tag">Intermediate</div>
+        <div class="resource-title">Market Structure</div>
+        <p class="resource-desc">Identify trending and ranging markets, key swing highs and lows, and break-of-structure signals used by smart money.</p>
+        <span class="resource-arrow">→</span>
+      </div>
+
+      <div class="resource-card fade-up">
+        <div class="resource-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77a5.07 5.07 0 0 0-.09-3.77S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        </div>
+        <div class="resource-tag">Advanced</div>
+        <div class="resource-title">Smart Money Concepts</div>
+        <p class="resource-desc">Dive deep into institutional trading — order blocks, fair value gaps, liquidity sweeps, and how banks move markets.</p>
+        <span class="resource-arrow">→</span>
+      </div>
+
+      <div class="resource-card fade-up">
+        <div class="resource-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <div class="resource-tag">Advanced</div>
+        <div class="resource-title">Trading Psychology</div>
+        <p class="resource-desc">Master the mental game — overcome FOMO, revenge trading, overconfidence, and build unshakeable discipline and consistency.</p>
+        <span class="resource-arrow">→</span>
+      </div>
+
+      <div class="resource-card fade-up">
+        <div class="resource-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div class="resource-tag">Mindset</div>
+        <div class="resource-title">The 1% Mindset</div>
+        <p class="resource-desc">Beyond charts and numbers — develop the habits, discipline, and long-term thinking that separates elite traders from the crowd.</p>
+        <span class="resource-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="disclaimer-box fade-up">
+      <h4>⚠ Educational Disclaimer</h4>
+      <p>All resources provided by TRADEZZ are strictly for educational and informational purposes. Nothing in this server or on this site constitutes financial advice. Always conduct your own research and consult a licensed financial advisor before making any investment decisions.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div>
+      <div class="footer-brand-name">TRADEZZ</div>
+      <div class="footer-brand-sub">Elite Traders · Est. 2025</div>
+      <p class="footer-desc">A free, community-driven space where traders learn, share, and grow together.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Navigation</div>
+      <ul class="footer-links">
+        <li><a onclick="showPage('home')">Home</a></li>
+        <li><a onclick="showPage('about')">About Us</a></li>
+        <li><a onclick="showPage('resources')">Resources</a></li>
+        <li><a onclick="showPage('contact')">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Community</div>
+      <ul class="footer-links">
+        <li><a href="#">Discord Server</a></li>
+        <li><a onclick="showPage('about')">Server Rules</a></li>
+      </ul>
+    </div>
+  </footer>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 TRADEZZ Elite Traders — All Rights Reserved</span>
+    <span class="footer-copy">For Educational Purposes Only · Not Financial Advice</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: CONTACT
+════════════════════════════════════════ -->
+<div class="page" id="page-contact">
+
+  <div class="contact-hero">
+    <span class="section-tag" style="opacity:0;animation:fadeUp .8s .1s forwards">Get In Touch</span>
+    <h1 class="section-title" style="font-size:clamp(2rem,6vw,4rem);opacity:0;animation:fadeUp .8s .25s forwards">Contact Us</h1>
+    <div class="section-line"></div>
+    <p class="section-lead" style="opacity:0;animation:fadeUp .8s .4s forwards">Have questions? Ready to join? We'd love to hear from you.</p>
+  </div>
+
+  <section style="background:var(--bg2);">
+    <div class="contact-layout">
+      <div class="contact-info fade-up">
+        <h3>Connect With TRADEZZ</h3>
+        <p>Whether you're curious about the community, need help with a trading question, or just want to say hello — we're here.</p>
+
+        <div class="contact-detail">
+          <div class="contact-detail-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.001.022.01.043.023.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+          </div>
+          <div class="contact-detail-text">
+            <div class="contact-detail-label">Primary Platform</div>
+            <div class="contact-detail-value">Discord Community Server</div>
+          </div>
+        </div>
+
+        <div class="contact-detail">
+          <div class="contact-detail-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="contact-detail-text">
+            <div class="contact-detail-label">Leadership</div>
+            <div class="contact-detail-value">Dragos · Soumya (Infinix) · Soumyajit2928</div>
+          </div>
+        </div>
+
+        <div class="contact-detail">
+          <div class="contact-detail-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="contact-detail-text">
+            <div class="contact-detail-label">Response Time</div>
+            <div class="contact-detail-value">Usually within 24 hours</div>
+          </div>
+        </div>
+
+        <div class="contact-detail">
+          <div class="contact-detail-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="contact-detail-text">
+            <div class="contact-detail-label">Community</div>
+            <div class="contact-detail-value">Global · Online · Always Open</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-form-wrapper fade-up">
+        <div class="form-title">Send Us a Message</div>
+
+        <div id="contactForm">
+          <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input type="text" class="form-control" placeholder="Enter your name" id="fname">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Discord Username</label>
+            <input type="text" class="form-control" placeholder="e.g. username#0000" id="fdiscord">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <select class="form-control form-select" id="fsubject">
+              <option value="">Select a topic</option>
+              <option>Joining the Community</option>
+              <option>Trading Question</option>
+              <option>Report an Issue</option>
+              <option>Partnership / Collaboration</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea class="form-control" placeholder="Write your message here..." id="fmessage"></textarea>
+          </div>
+          <button class="form-submit" onclick="submitForm()">Send Message</button>
+        </div>
+
+        <div class="form-success" id="formSuccess">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#4db87a" stroke-width="1.5" style="margin:0 auto 1rem;display:block"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          <p style="color:var(--accent);font-family:'Cinzel',serif;font-size:1rem;letter-spacing:.05em;margin-bottom:.5rem">Message Received</p>
+          <p style="color:var(--text-dim)">Thank you! Our team will get back to you within 24 hours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div>
+      <div class="footer-brand-name">TRADEZZ</div>
+      <div class="footer-brand-sub">Elite Traders · Est. 2025</div>
+      <p class="footer-desc">A free, community-driven space where traders learn, share, and grow together.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Navigation</div>
+      <ul class="footer-links">
+        <li><a onclick="showPage('home')">Home</a></li>
+        <li><a onclick="showPage('about')">About Us</a></li>
+        <li><a onclick="showPage('resources')">Resources</a></li>
+        <li><a onclick="showPage('contact')">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Community</div>
+      <ul class="footer-links">
+        <li><a href="#">Discord Server</a></li>
+        <li><a onclick="showPage('about')">Server Rules</a></li>
+      </ul>
+    </div>
+  </footer>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 TRADEZZ Elite Traders — All Rights Reserved</span>
+    <span class="footer-copy">For Educational Purposes Only · Not Financial Advice</span>
+  </div>
+</div>
+
+<script>
+  // ─── PAGE ROUTING ───
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    const navEl = document.getElementById('nav-' + name);
+    if (navEl) navEl.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Re-trigger observers
+    setTimeout(observeFadeUps, 100);
+  }
+
+  // ─── MOBILE MENU ───
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  // ─── SCROLL ANIMATIONS ───
+  function observeFadeUps() {
+    const els = document.querySelectorAll('.fade-up:not(.visible)');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    els.forEach(el => observer.observe(el));
+  }
+
+  observeFadeUps();
+
+  // ─── CONTACT FORM ───
+  function submitForm() {
+    const name = document.getElementById('fname').value.trim();
+    const msg = document.getElementById('fmessage').value.trim();
+    if (!name || !msg) {
+      alert('Please fill in at least your name and message.');
+      return;
+    }
+    document.getElementById('contactForm').style.display = 'none';
+    document.getElementById('formSuccess').classList.add('visible');
+  }
+</script>
+</body>
+</html>
