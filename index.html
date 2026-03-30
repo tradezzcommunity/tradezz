@@ -1120,7 +1120,7 @@
       </div>
       <div class="team-card fade-up">
         <div class="team-avatar">S</div>
-        <div class="team-role">Moderator, Co-Founder &amp; Admin</div>
+        <div class="team-role">Moderator &amp; Admin</div>
         <div class="team-name">Soumya</div>
         <div class="team-alias">Infinix</div>
       </div>
@@ -1143,7 +1143,7 @@
   <div class="discord-cta fade-up">
     <h2>Ready to Join the Community?</h2>
     <p>Step into a growing circle of traders. Free. Forever. Focused on your growth.</p>
-    <a class="discord-btn" href="https://discord.gg/sy3Anr6qm6" onclick="showPage('contact')">
+    <a class="discord-btn" href="#" onclick="showPage('contact')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.001.022.01.043.023.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
       Join on Discord
     </a>
@@ -1556,7 +1556,8 @@
             <label class="form-label">Message</label>
             <textarea class="form-control" placeholder="Write your message here..." id="fmessage"></textarea>
           </div>
-          <button class="form-submit" onclick="submitForm()">Send Message</button>
+          <button class="form-submit" id="submitBtn" onclick="submitForm()">Send Message</button>
+          <p id="formError" style="display:none;color:#e07070;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.1em;margin-top:1rem;text-align:center;line-height:1.6;"></p>
         </div>
 
         <div class="form-success" id="formSuccess">
@@ -1598,7 +1599,17 @@
   </div>
 </div>
 
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
+  // ─── EMAILJS CONFIG ───
+  // ⚠️  REPLACE these three values with your own from emailjs.com
+  const EMAILJS_PUBLIC_KEY  = 'yST3dNGnTyBf6QVnX';    // Account → API Keys → Public Key
+  const EMAILJS_SERVICE_ID  = 'service_8o0fa4i';    // Email Services → your service ID
+  const EMAILJS_TEMPLATE_ID = 'template_41wrmbi';   // Email Templates → your template ID
+
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
   // ─── PAGE ROUTING ───
   function showPage(name) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1607,7 +1618,6 @@
     const navEl = document.getElementById('nav-' + name);
     if (navEl) navEl.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Re-trigger observers
     setTimeout(observeFadeUps, 100);
   }
 
@@ -1633,15 +1643,53 @@
   observeFadeUps();
 
   // ─── CONTACT FORM ───
-  function submitForm() {
-    const name = document.getElementById('fname').value.trim();
-    const msg = document.getElementById('fmessage').value.trim();
-    if (!name || !msg) {
-      alert('Please fill in at least your name and message.');
+  async function submitForm() {
+    const name    = document.getElementById('fname').value.trim();
+    const discord = document.getElementById('fdiscord').value.trim();
+    const subject = document.getElementById('fsubject').value;
+    const message = document.getElementById('fmessage').value.trim();
+    const btn     = document.getElementById('submitBtn');
+    const errEl   = document.getElementById('formError');
+
+    // Reset error
+    errEl.style.display = 'none';
+    errEl.textContent = '';
+
+    // Basic validation
+    if (!name || !message) {
+      errEl.textContent = 'Please fill in your name and message before sending.';
+      errEl.style.display = 'block';
       return;
     }
-    document.getElementById('contactForm').style.display = 'none';
-    document.getElementById('formSuccess').classList.add('visible');
+
+    // Loading state
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+
+    const templateParams = {
+      from_name:      name,
+      discord_handle: discord || 'Not provided',
+      subject:        subject  || 'General Enquiry',
+      message:        message,
+      to_email:       'tradezzcommunity@gmail.com',
+      reply_to:       discord || name,
+    };
+
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+      // Success
+      document.getElementById('contactForm').style.display = 'none';
+      document.getElementById('formSuccess').classList.add('visible');
+    } catch (err) {
+      // Show error, restore button
+      errEl.textContent = 'Something went wrong. Please try again or reach us directly on Discord.';
+      errEl.style.display = 'block';
+      btn.textContent = 'Send Message';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      console.error('EmailJS error:', err);
+    }
   }
 </script>
 </body>
